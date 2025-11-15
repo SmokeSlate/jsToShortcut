@@ -131,4 +131,6 @@ npm run generate-docs
 
 This file is designed to feed into AI workflows or code completion systems that
 need structured documentation for every action available in
-`actions/MacOS-15.4/compiled.json`.
+`actions/MacOS-15.4/compiled.json`. Each entry lists the official Shortcuts
+output type identifiers (for example `com.apple.Bridge.BoldTextEntity`) so AI
+agents can reason about the data produced by every action.

@@ -4,7 +4,8 @@
   "description": "Compile a JavaScript DSL into fully-formed Apple Shortcuts property lists.",
   "main": "src/index.js",
   "scripts": {
-    "build-example": "node src/cli.js examples/hello.shortcut.js --out build/hello.shortcut"
+    "build-example": "node src/cli.js examples/hello.shortcut.js --out build/hello.shortcut",
+    "generate-docs": "node scripts/generate-action-docs.js"
   },
   "keywords": [
     "shortcuts",
