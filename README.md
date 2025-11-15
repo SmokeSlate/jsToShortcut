@@ -119,3 +119,16 @@ curl --location --request POST 'https://hubsign.routinehub.services/sign' \
 The generated shortcut is a binary property list produced with
 `bplist-creator`, so you can also rename it manually to `.shortcut` and import
 it directly on macOS/iOS/iPadOS if you prefer to use the cURL flow yourself.
+
+### Action reference for AI agents
+
+The entire Shortcuts action catalog (names, identifiers, descriptions, and
+parameters) is exported to `docs/actions.md`. Regenerate it at any time with:
+
+```bash
+npm run generate-docs
+```
+
+This file is designed to feed into AI workflows or code completion systems that
+need structured documentation for every action available in
+`actions/MacOS-15.4/compiled.json`.
