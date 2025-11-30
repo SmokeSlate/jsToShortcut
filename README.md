@@ -8,11 +8,14 @@ metadata, and emit a `.shortcut` bundle that you can AirDrop or import via
 ## Getting started
 
 ```bash
-npm install
+npm install --save-dev js-to-shortcut
 
-# Build the example shortcut and emit both a .shortcut and JSON preview
-node src/cli.js examples/hello.shortcut.js --out build/hello.shortcut --pretty
+# Compile your shortcut and emit both a .shortcut and JSON preview
+npx jstoshortcut path/to/shortcut.js --out build/shortcut.shortcut --pretty
 ```
+
+> Working inside this repository? Run `npm install` once and continue to call
+> `node src/cli.js ...` directly so you can test local changes without publishing.
 
 The CLI loads `actions/MacOS-15.4/compiled.json` to make sure every call to
 `action()` references a real identifier and the right parameter keys. Pass
@@ -27,7 +30,7 @@ Shortcut scripts export either:
 
 ```js
 // examples/hello.shortcut.js
-const runtime = require('../src');
+const runtime = require('js-to-shortcut');
 
 module.exports = ({
   action = runtime.action,
@@ -48,11 +51,14 @@ module.exports = ({
   });
 ```
 
+> When hacking on this repository directly, swap `require('js-to-shortcut')`
+> with `require('../src')` so changes are reflected without publishing.
+
 You can use any identifier from `actions/MacOS-15.4/compiled.json`. To see the
-full list, run:
+full list locally, run:
 
 ```bash
-node src/cli.js --list-actions path/to/any/script.js
+npx jstoshortcut path/to/any/script.js --list-actions
 ```
 
 Parameters are validated by key (for example `WFCommentActionText`). The
@@ -60,12 +66,50 @@ Parameters are validated by key (for example `WFCommentActionText`). The
 `raw`) create the structures that Shortcuts expects inside plist files. For
 advanced scenarios you can always supply your own serialization dictionary.
 
+#### Working with magic variables
+
+Every action created through `runtime.action()` automatically receives a stable
+`UUID`. You can reference that output later with
+`serialization.magicVariable(...)` and splice it into text tokens using the
+`serialization.magicText` template helper:
+
+```js
+const shortcutConfig = action('is.workflow.actions.dictionary', {
+  WFItems: serialization.dictionary({
+    updateUrl: serialization.text('https://example.com/status.json'),
+  }),
+});
+
+const updateResponse = action('is.workflow.actions.getcontents', {
+  WFURL: serialization.magicText`${serialization.magicVariable(
+    shortcutConfig,
+    {
+      aggrandizements: [
+        serialization.aggrandizements.dictionaryValue('updateUrl'),
+      ],
+    },
+  )}`,
+});
+
+action('is.workflow.actions.comment', {
+  WFCommentActionText: serialization.magicText`Latest payload: ${serialization.magicVariable(
+    updateResponse,
+  )}`,
+});
+```
+
+The helper accepts optional aggrandizements so you can traverse dictionaries or
+coerce output types (`serialization.aggrandizements.coercion('WFStringContentItem')`).
+If you need to reference built-in variables (for example Repeat Item), pass
+`magicVariable(null, { type: 'RepeatItem' })` and mix it into a `magicText`
+template the same way.
+
 ### CLI reference
 
 ```
-node src/cli.js <input> [--out file.shortcut] [--metadata actions.json]
-                [--name "My Shortcut"] [--pretty] [--plist] [--list-actions]
-                [--strict | --no-strict] [--hubsign]
+npx jstoshortcut <input> [--out file.shortcut] [--metadata actions.json]
+  [--name "My Shortcut"] [--pretty] [--plist] [--list-actions]
+  [--strict | --no-strict] [--hubsign]
 ```
 
 - `--out` - destination `.shortcut`. Defaults to `<input-without-ext>.shortcut`.
@@ -78,8 +122,9 @@ node src/cli.js <input> [--out file.shortcut] [--metadata actions.json]
 - `--list-actions` - print every known action identifier and exit.
 - `--no-strict` - allow extra parameters on actions (useful when experimenting
   with undocumented keys).
-- `--hubsign` - automatically send the compiled shortcut to RoutineHub HubSign
-  and replace the local file with the signed result.
+- `--hubsign` - enabled by default; automatically sends the compiled shortcut to
+  RoutineHub HubSign and overwrites the output with the signed result. Pass
+  `--no-hubsign` to skip the upload.
 - `--hubsign-name` - override the name passed to HubSign (defaults to the
   shortcut `name` field).
 - `--hubsign-key` - supply a HubSign API key (only required for endpoints that
@@ -90,13 +135,13 @@ node src/cli.js <input> [--out file.shortcut] [--metadata actions.json]
 
 ### Signing with RoutineHub HubSign
 
-The CLI can replicate the `curl` workflow used by HubSign. Add `--hubsign` to
-the compile command and it will POST the `.shortcut` bundle and overwrite it
-with the returned, signed file.
+The CLI mirrors the `curl` workflow used by HubSign and now opts-in by default.
+Each compile uploads the `.shortcut` bundle, waits for the signed response, and
+overwrites the local file. Pass `--no-hubsign` if you only want a local export.
 
 ```bash
-node src/cli.js examples/hello.shortcut.js --out dist/hello.shortcut \
-  --hubsign --hubsign-name "Hello from js-to-shortcut"
+npx jstoshortcut examples/hello.shortcut.js --out dist/hello.shortcut \
+  --hubsign-name "Hello from js-to-shortcut"
 ```
 
 The default endpoint (`https://hubsign.routinehub.services/sign`) only requires
@@ -133,4 +178,6 @@ This file is designed to feed into AI workflows or code completion systems that
 need structured documentation for every action available in
 `actions/MacOS-15.4/compiled.json`. Each entry lists the official Shortcuts
 output type identifiers (for example `com.apple.Bridge.BoldTextEntity`) so AI
-agents can reason about the data produced by every action.
+agents can reason about the data produced by every action. Pair it with
+`docs/AI_GUIDE.md` for prompt engineering tips and code patterns tailored to
+language models.

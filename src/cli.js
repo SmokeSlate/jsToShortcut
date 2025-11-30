@@ -86,7 +86,7 @@ async function main(argv) {
         .option('hubsign', {
           describe: 'Send the compiled shortcut to RoutineHub HubSign',
           type: 'boolean',
-          default: false,
+          default: true,
         })
         .option('hubsign-name', {
           describe: 'Override the HubSign shortcut name',

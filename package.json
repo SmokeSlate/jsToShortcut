@@ -3,8 +3,14 @@
   "version": "0.1.0",
   "description": "Compile a JavaScript DSL into fully-formed Apple Shortcuts property lists.",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./cli": "./src/cli.js",
+    "./hubsign": "./src/hubsign.js",
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build-example": "node src/cli.js examples/hello.shortcut.js --out build/hello.shortcut",
+    "build-example": "node src/cli.js examples/hello.shortcut.js --out build/hello.shortcut --no-hubsign",
     "generate-docs": "node scripts/generate-action-docs.js"
   },
   "keywords": [
@@ -13,10 +19,31 @@
     "compiler"
   ],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jackp/jsToShortcut.git"
+  },
+  "homepage": "https://github.com/jackp/jsToShortcut#readme",
+  "bugs": {
+    "url": "https://github.com/jackp/jsToShortcut/issues"
+  },
   "license": "MIT",
   "type": "commonjs",
   "bin": {
     "jstoshortcut": "src/cli.js"
+  },
+  "files": [
+    "actions",
+    "docs",
+    "examples",
+    "scripts",
+    "ShortcutDocumentation",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "bplist-creator": "^0.1.1",

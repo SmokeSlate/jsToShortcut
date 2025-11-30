@@ -4,6 +4,9 @@ This document was auto-generated from `actions/iOS-26/compiled.json` (source: `a
 
 Use these action identifiers inside `action("<identifier>", { ...parameters })` when building shortcuts with js-to-shortcut. Each action lists the known parameters and any descriptions exported by Shortcuts on macOS 15.4.
 
+For prompt-engineering advice and JavaScript best practices targeting AI agents,
+read `docs/AI_GUIDE.md` alongside this catalog.
+
 ## Add 2Do Task (`com.guidedways.2Do.add`)
 
 Adds a new task to 2Do.

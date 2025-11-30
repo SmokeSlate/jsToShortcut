@@ -62,6 +62,9 @@ function buildAction(registry, identifier, parameters, options = {}) {
     parameters,
     options,
   );
+  if (options.uuid && !normalizedParameters.UUID) {
+    normalizedParameters.UUID = options.uuid;
+  }
   const result = {
     WFWorkflowActionIdentifier: id,
     WFWorkflowActionParameters: normalizedParameters,
